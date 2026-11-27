@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bringing Soundweb greens back to live — KBLsystems Audio Lab</title>
+<meta name="description" content="On the bench is a stack of green Soundweb 9088 and 9088ii units, some of them dead. They are old, but they can do FIR — which is why they are still worth repairing. We are still using quite a lot of old green Soundweb…">
+<meta name="author" content="Thei Munten">
+<meta name="theme-color" content="#0b0f12">
+<meta property="og:title" content="Bringing Soundweb greens back to live — KBLsystems Audio Lab">
+<meta property="og:description" content="On the bench is a stack of green Soundweb 9088 and 9088ii units, some of them dead. They are old, but they can do FIR — which is why they are still worth repairing. We are still using quite a lot of old green Soundweb…">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('kbl-theme');if(!t)t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="wrap site-header__inner">
+<a class="brand" href="../index.html"><span class="brand__mark"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="2" y="14" width="3.2" height="8" rx=".8"/><rect x="7.6" y="10" width="3.2" height="12" rx=".8"/><rect x="13.2" y="6" width="3.2" height="16" rx=".8"/><rect x="18.8" y="2" width="3.2" height="20" rx=".8"/></svg></span><span><span class="brand__name">KBLsystems</span><span class="brand__sub">Audio Lab</span></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../labels/x-over-setup.html">X-over</a><a href="../labels/stm32.html">STM32</a><a href="../labels/fir-filtering.html">FIR</a><a href="../labels/past-projects.html">Past</a><a href="../about.html">About</a></nav>
+<div class="header-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" stroke-linecap="round"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke-linejoin="round"/></svg></button></div>
+</div>
+</header>
+<div class="read-progress" data-progress></div><main id="main" data-article>
+<div class="wrap">
+<header class="article-head"><span class="kicker">Electronics field note</span><h1>Bringing Soundweb greens back to live</h1><div class="article-meta"><span>Sep 2014</span><span class="dot"></span><a class="tag" href="../labels/electronics.html">Electronics</a><span class="dot"></span><span>3 min read</span><span class="dot"></span><span>By Thei Munten</span></div></header>
+<div class="article-layout"><article class="article-body"><div class="prose"><p>On the bench is a stack of green Soundweb 9088 and 9088ii units, some of them dead. They are old, but they can do FIR — which is why they are still worth repairing.</p>
+<p>We are still using quite a lot of old green Soundweb 9088 and 9088ii units in our sound projects. The main reason is that these ancient machines were already capable of some FIR filtering. Mind you: there is a bug in the software that makes you have to reverse the filter kernels. Presumably nobody ever noticed, using linear-phase filters (symmetrical as these will be). ;)</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/bringing-soundweb-greens-back-to-live/01.jpg"><img alt="Green Soundweb 9088 units stacked on the bench" class="post-figure-img" decoding="async" height="900" loading="lazy" src="../assets/img/bringing-soundweb-greens-back-to-live/01.jpg" width="1600" srcset="../assets/img/bringing-soundweb-greens-back-to-live/01-480.webp 480w, ../assets/img/bringing-soundweb-greens-back-to-live/01-960.webp 960w, ../assets/img/bringing-soundweb-greens-back-to-live/01-1600.webp 1600w, ../assets/img/bringing-soundweb-greens-back-to-live/01.jpg 1600w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>Anyway, I had some broken ones lying around, so I thought it was time to do some repairing. One of the apparent vulnerabilities is the power-supply cap marked C216. After replacing those I was able to get some of them back to life. For all of you out there plagued by the dreaded searching... (ad infinitum) mode, I will repeat some rules:</p>
+<ol>
+<li>Replace the C216 cap; while you are at it, it may be a good idea to upgrade C265 with something beefier as well.</li>
+<li>Use the spare jumper at the option A position to set the machine in debug mode.</li>
+<li>Switch on power; you should now get the "nightrider" row of flashing LEDs.</li>
+<li>Use the backup loader.exe to reload the firmware. Make sure you have the correct *.a21 file. I learned the hard way not to make a mistake!</li>
+<li>When done, switch off power, replace the jumper and reboot.</li>
+</ol>
+<p>As always, use the correct COM port settings and bitrate (38400 front, 115200 back). The FTDI driver/USB-to-RS232 works fine on Windows XP (and 7), but on Windows 8 it appears to be troublesome.</p>
+<h2 id="audiophile-mods">"Audiophile" mods</h2>
+<p>Now for the fun — and utterly time-consuming and by no means commercially viable — part. Let's see if we can do some "audiophile" modifications. In the issue 1 model (9088) there are some VCA ICs built in to facilitate volume control directly after the DACs. These suck. ;) I forgot the type number, but in an earlier experiment some years ago I removed them and shortened the signal path. So no more volume control on the output, and maybe, with high-gain power amps, a bit of excessive noise. But hey, who cares about noise? It's the universe coming through our speakers. Big plus!</p>
+<p>Next thing I thought would be worthwhile is replacing all these non-polar caps in the signal path. Well, this wasn't going to happen: all my regular dope dealers like Farnell and RS seemed to have stopped selling them. Hmm, bummer. Now what if we replaced them with regular caps back-to-back with a DC bias? This is an idea I actually stole from a very old Midas PRO4 console I once owned.</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/bringing-soundweb-greens-back-to-live/02.jpg"><img alt="Modified Soundweb board with back-to-back capacitors and DC bias" class="post-figure-img" decoding="async" height="900" loading="lazy" src="../assets/img/bringing-soundweb-greens-back-to-live/02.jpg" width="1600" srcset="../assets/img/bringing-soundweb-greens-back-to-live/02-480.webp 480w, ../assets/img/bringing-soundweb-greens-back-to-live/02-960.webp 960w, ../assets/img/bringing-soundweb-greens-back-to-live/02-1600.webp 1600w, ../assets/img/bringing-soundweb-greens-back-to-live/02.jpg 1600w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>Big improvement? Argh, euh, yes: with all my skills I can notice the difference (some more clarity), but I am not even sure if this is desirable. So, nah, not going to do that on all our machines...</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/bringing-soundweb-greens-back-to-live/03.jpg"><img alt="Soundweb boards on the bench during the capacitor modification" class="post-figure-img" decoding="async" height="900" loading="lazy" src="../assets/img/bringing-soundweb-greens-back-to-live/03.jpg" width="1600" srcset="../assets/img/bringing-soundweb-greens-back-to-live/03-480.webp 480w, ../assets/img/bringing-soundweb-greens-back-to-live/03-960.webp 960w, ../assets/img/bringing-soundweb-greens-back-to-live/03-1600.webp 1600w, ../assets/img/bringing-soundweb-greens-back-to-live/03.jpg 1600w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>...edit...edit...edit... Not completely convinced by the disappointing results of the above modification, I decided to give it a second try. Same mod, but this time I tested a stereo A/B comparison. Wow. This is some serious shit: a much broader and deeper image and a very convincing musical impact. Now why the hell is this???</p></div><nav class="postnav" aria-label="More notes"><a href="../posts/active-x-overed-hifi.html"><span class="mono">&larr; Previous note</span><strong>Active X-overed HiFi ?</strong></a><a href="../posts/loureed-with-new-carbon-cone-speakers.html"><span class="mono">Next note &rarr;</span><strong>LouReed with new carbon cone speakers</strong></a></nav></article>
+<aside class="article-rail">
+<div class="rail-box"><h2>Note details</h2><div class="rail-stats"><div><span>Published</span><b>Sep 2014</b></div><div><span>Reading</span><b>3 min</b></div><div><span>Words</span><b>552</b></div><div><span>Figures</span><b>3</b></div></div></div>
+<div class="rail-box"><h2>Filed under</h2><div class="chips"><a class="chip" href="../labels/electronics.html">Electronics</a><a class="chip" href="../labels/past-projects.html">Past Projects</a></div></div>
+
+<div class="rail-box"><h2>Read next</h2><div class="rail-list"><a href="../posts/di-box.html"><img src="../assets/img/di-box/02.jpg" srcset="../assets/img/di-box/02-480.webp 480w, ../assets/img/di-box/02-960.webp 960w, ../assets/img/di-box/02-1600.webp 1600w, ../assets/img/di-box/02.jpg 1600w" sizes="60px" width="1600" height="1200" alt="Making a DI box" loading="lazy" decoding="async"><span>Making a DI box</span></a><a href="../posts/fighting-long-boot-times-when-using.html"><img src="../assets/img/fighting-long-boot-times-when-using/01.jpg" srcset="../assets/img/fighting-long-boot-times-when-using/01-480.webp 480w, ../assets/img/fighting-long-boot-times-when-using/01-960.webp 960w, ../assets/img/fighting-long-boot-times-when-using/01.jpg 1200w" sizes="60px" width="1200" height="1600" alt="Fighting long boot times when using older RPI" loading="lazy" decoding="async"><span>Fighting long boot times when using older RPI</span></a></div></div>
+<div class="rail-box"><h2>About</h2><p>Research notes by Thei Munten, sound engineer and audio researcher. Measurement-led, always.</p><p style="margin-top:10px"><a href="../about.html" style="color:var(--accent);text-decoration:none">About the lab &rarr;</a></p></div>
+</aside></div>
+</div>
+</main>
+<footer class="site-footer">
+<div class="wrap footer-inner">
+<div class="footer-brand"><strong>KBLsystems Audio Lab</strong>A local static archive of 29 notes on sound reproduction, measurement and the machines that make it happen.</div>
+<div class="footer-links"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../about.html">About</a><a href="../examples/index.html">Design study</a><a href="https://kblsystems.blogspot.com/" target="_blank" rel="noopener noreferrer">Original blog</a></div>
+</div>
+</footer>
+</body></html>

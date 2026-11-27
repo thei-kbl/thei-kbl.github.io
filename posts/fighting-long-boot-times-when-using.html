@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fighting long boot times when using older RPI — KBLsystems Audio Lab</title>
+<meta name="description" content="On the bench is an old Raspberry Pi with a HifiBerry DAC and a USB stick, taking what feels like forever to boot. The hardware is fine; the operating system is the problem. It has been quite a while since I built my…">
+<meta name="author" content="Thei Munten">
+<meta name="theme-color" content="#0b0f12">
+<meta property="og:title" content="Fighting long boot times when using older RPI — KBLsystems Audio Lab">
+<meta property="og:description" content="On the bench is an old Raspberry Pi with a HifiBerry DAC and a USB stick, taking what feels like forever to boot. The hardware is fine; the operating system is the problem. It has been quite a while since I built my…">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('kbl-theme');if(!t)t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="wrap site-header__inner">
+<a class="brand" href="../index.html"><span class="brand__mark"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="2" y="14" width="3.2" height="8" rx=".8"/><rect x="7.6" y="10" width="3.2" height="12" rx=".8"/><rect x="13.2" y="6" width="3.2" height="16" rx=".8"/><rect x="18.8" y="2" width="3.2" height="20" rx=".8"/></svg></span><span><span class="brand__name">KBLsystems</span><span class="brand__sub">Audio Lab</span></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../labels/x-over-setup.html">X-over</a><a href="../labels/stm32.html">STM32</a><a href="../labels/fir-filtering.html">FIR</a><a href="../labels/past-projects.html">Past</a><a href="../about.html">About</a></nav>
+<div class="header-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" stroke-linecap="round"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke-linejoin="round"/></svg></button></div>
+</div>
+</header>
+<div class="read-progress" data-progress></div><main id="main" data-article>
+<div class="wrap">
+<header class="article-head"><span class="kicker">Electronics field note</span><h1>Fighting long boot times when using older RPI</h1><div class="article-meta"><span>May 2023</span><span class="dot"></span><a class="tag" href="../labels/electronics.html">Electronics</a><span class="dot"></span><span>4 min read</span><span class="dot"></span><span>By Thei Munten</span></div></header>
+<div class="article-layout"><article class="article-body"><div class="prose"><p>On the bench is an old Raspberry Pi with a HifiBerry DAC and a USB stick, taking what feels like forever to boot. The hardware is fine; the operating system is the problem.</p>
+<p>It has been quite a while since I built my "audiophile" music player (<a href="../posts/raspberry-pi-with-balanced-output.html">raspberry-pi-with-balanced-output</a>). It has been almost a decade now, and there are a zillion dedicated distros around to make this really easy. Just Google "RPI music player". All really nice and slick... but taking... ages... to boot, certainly on older Pis.</p>
+<p>So while reviving this old project to include a transformer-balanced output (driven with a class A stage running an NE5532!), I worked my way through the big pile of clogged info to get a faster-booting system.</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/fighting-long-boot-times-when-using/01.jpg"><img alt="Raspberry Pi with a HifiBerry DAC and a USB drive connected" class="post-figure-img" decoding="async" height="1600" loading="lazy" src="../assets/img/fighting-long-boot-times-when-using/01.jpg" width="1200" srcset="../assets/img/fighting-long-boot-times-when-using/01-480.webp 480w, ../assets/img/fighting-long-boot-times-when-using/01-960.webp 960w, ../assets/img/fighting-long-boot-times-when-using/01.jpg 1200w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>Now, the easiest way would be to get a custom-built image using a build system like Buildroot, Yocto or OpenWrt. I had a go at all of them, but the easiest way for a total noob like me to get going is to start with <a href="https://buildroot.org/" rel="noopener noreferrer" target="_blank">Buildroot</a>. Follow the walk-through (maybe add an SSH client like Dropbear) and you will quickly get your own fast-booting image. That is: it isn't complicated, but the compilation takes hours!</p>
+<p>The bit more nasty part comes when you want to take it further. Not many people talk about this, so for future reference, here are some reminders — as long as this is of any value in the always-changing, wonderful world of Linux. 😂</p>
+<h2 id="dtoverlays-and-audio">dtoverlays and audio</h2>
+<p>The RPi has its own rather special way of booting, at which time you can configure all kinds of hardware add-ons using so-called <b>dtoverlays</b>. If you have been working with an RPi and audio, you will have come across these. To configure them, edit the <code>config.txt</code> file in the "boot" partition of your disk image. (Sometimes it will have just a number instead of the name "boot".)</p>
+<p>For a first test, add <code>dtparams=audio=on</code> to this file. This will select the on-board, shitty audio out. In theory. But the inner workings of Linux in these Buildroot builds don't seem to load the necessary kernel modules. Something with udev and dts/dto. Complicated stuff. Tell us when you know how to do this! I got it working with <code>modprobe snd-bcm2835</code>.</p>
+<p>We did select the packages to get ALSA and other obvious stuff like MPD, MPC and a text editor in our simple build, right?</p>
+<p>Now, to play some music from that USB stick, you will have to mount it first. <code>blkid</code> will give you a device name or UUID; create a mount point and mount it. Configure <code>/etc/mpd.conf</code> to point to that music directory, and add a default ALSA audio-out setting while you're there.</p>
+<p>Restart MPD: first kill it by PID number found with <code>ps</code>, then start it with <code>mpd</code> (no sysctl or systemd in default BusyBox). Now <code>mpc</code> will hopefully have control and some information on MPD.</p>
+<p>Now on to even more remarkably easy-to-forget nooks and crannies. We do want that I²S DAC thing running. In the picture is a simple I²S-slave interface that doesn't need any configuration by I²C. I think most of these simple boards will work; this one is an old HifiBerry DAC with a PCM5102A. That is a significant hint to get it going.</p>
+<p>First, comment out <code>dtparams=audio=on</code> and add <code>dtoverlay=hifiberry-dac</code> in the aforementioned <code>config.txt</code> file. But you will not have any overlays in that "boot" directory, so download it from GitHub or strip it from another distro. Probably kernel versions and the <code>.dtbo</code> file will have some relation...</p>
+<p>Now for the similar modprobing:</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/fighting-long-boot-times-when-using/02.png"><img alt="Terminal output from lsmod showing the loaded sound modules" class="post-figure-img" decoding="async" height="321" loading="lazy" src="../assets/img/fighting-long-boot-times-when-using/02.png" width="815" srcset="../assets/img/fighting-long-boot-times-when-using/02-480.webp 480w, ../assets/img/fighting-long-boot-times-when-using/02.png 815w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>You need all four to get it going: <b>snd-soc-bcm2835-i2s, snd-soc-core, snd-soc-pcm5102a, snd-soc-rpi-simple-soundcard.</b></p>
+<p>Finally! Audio from your I²S board.</p>
+<p>Now, to make it persistent after reboot, you have to make a little script in <code>/etc/init.d</code>. Give it a number somewhat lower than the MPD start-stop script, which in my case was S95. (That's a capital S!)</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/fighting-long-boot-times-when-using/03.png"><img alt="Terminal output from aplay listing the HifiBerry DAC sound card" class="post-figure-img" decoding="async" height="124" loading="lazy" src="../assets/img/fighting-long-boot-times-when-using/03.png" width="808" srcset="../assets/img/fighting-long-boot-times-when-using/03-480.webp 480w, ../assets/img/fighting-long-boot-times-when-using/03.png 808w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>Don't forget to mount your USB music drive before starting MPD. I edited the MPD start script to mount the drive; the usual fstab method doesn't work too well. Presumably the default MPD start script will be started before the USB drive is ready for mounting.</p>
+<h2 id="gpio-and-one-more-thing">GPIO, and one more thing</h2>
+<p>Other nice stuff to implement: we can use <a href="https://en.wikipedia.org/wiki/Sysfs" rel="noopener noreferrer" target="_blank">sysfs kernel</a> modules to manipulate GPIO ports. Make sure the pins are not in use for other functions (like I²S, duh). Here is a small script:</p>
+<pre><code>#!/bin/sh
+
+# gpio17 to drive an LED:
+echo 17 &gt; /sys/class/gpio/export
+echo out &gt; /sys/class/gpio/gpio17/direction
+
+# gpio27 to have a push button to do "mpc next":
+echo 27 &gt; /sys/class/gpio/export
+echo in &gt; /sys/class/gpio/gpio27/direction
+
+while true
+do
+  if mpc status | grep -q 'playing'; then
+    echo 1 &gt; /sys/class/gpio/gpio17/value
+  else
+    echo 0 &gt; /sys/class/gpio/gpio17/value
+  fi
+
+  if cat /sys/class/gpio/gpio27/value | grep -q '1'; then
+    mpc next
+  fi
+
+  sleep 0.5
+done</code></pre>
+<p>Oh, and one more thing: before starting to use something like Buildroot, think of a way to separate everything from your everyday work computer. It will make a big mess if you don't. I used VMware. Do configure plenty of drive space!</p></div><nav class="postnav" aria-label="More notes"><a href="../posts/di-box.html"><span class="mono">&larr; Previous note</span><strong>Making a DI box</strong></a><a href="../posts/tac-scorpion-revival.html"><span class="mono">Next note &rarr;</span><strong>TAC Scorpion revival</strong></a></nav></article>
+<aside class="article-rail">
+<div class="rail-box"><h2>Note details</h2><div class="rail-stats"><div><span>Published</span><b>May 2023</b></div><div><span>Reading</span><b>4 min</b></div><div><span>Words</span><b>848</b></div><div><span>Figures</span><b>3</b></div></div></div>
+<div class="rail-box"><h2>Filed under</h2><div class="chips"><a class="chip" href="../labels/electronics.html">Electronics</a><a class="chip" href="../labels/past-projects.html">Past Projects</a></div></div>
+<div class="rail-box"><h2>In this note</h2><div class="toc-list"><a class="toc-l2" href="#dtoverlays-and-audio">dtoverlays and audio</a><a class="toc-l2" href="#gpio-and-one-more-thing">GPIO, and one more thing</a></div></div>
+<div class="rail-box"><h2>Read next</h2><div class="rail-list"><a href="../posts/di-box.html"><img src="../assets/img/di-box/02.jpg" srcset="../assets/img/di-box/02-480.webp 480w, ../assets/img/di-box/02-960.webp 960w, ../assets/img/di-box/02-1600.webp 1600w, ../assets/img/di-box/02.jpg 1600w" sizes="60px" width="1600" height="1200" alt="Making a DI box" loading="lazy" decoding="async"><span>Making a DI box</span></a><a href="../posts/bringing-soundweb-greens-back-to-live.html"><img src="../assets/img/bringing-soundweb-greens-back-to-live/01.jpg" srcset="../assets/img/bringing-soundweb-greens-back-to-live/01-480.webp 480w, ../assets/img/bringing-soundweb-greens-back-to-live/01-960.webp 960w, ../assets/img/bringing-soundweb-greens-back-to-live/01-1600.webp 1600w, ../assets/img/bringing-soundweb-greens-back-to-live/01.jpg 1600w" sizes="60px" width="1600" height="900" alt="Bringing Soundweb greens back to live" loading="lazy" decoding="async"><span>Bringing Soundweb greens back to live</span></a></div></div>
+<div class="rail-box"><h2>About</h2><p>Research notes by Thei Munten, sound engineer and audio researcher. Measurement-led, always.</p><p style="margin-top:10px"><a href="../about.html" style="color:var(--accent);text-decoration:none">About the lab &rarr;</a></p></div>
+</aside></div>
+</div>
+</main>
+<footer class="site-footer">
+<div class="wrap footer-inner">
+<div class="footer-brand"><strong>KBLsystems Audio Lab</strong>A local static archive of 29 notes on sound reproduction, measurement and the machines that make it happen.</div>
+<div class="footer-links"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../about.html">About</a><a href="../examples/index.html">Design study</a><a href="https://kblsystems.blogspot.com/" target="_blank" rel="noopener noreferrer">Original blog</a></div>
+</div>
+</footer>
+</body></html>

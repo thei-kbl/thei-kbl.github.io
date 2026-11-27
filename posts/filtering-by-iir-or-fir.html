@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filtering by IIR or FIR — KBLsystems Audio Lab</title>
+<meta name="description" content="On the bench is a laptop with Audacity open on one side and a Smaart transfer function on the other. Before we argue about IIR or FIR, it helps to look at what the audio actually is. Before we dive into the depths of…">
+<meta name="author" content="Thei Munten">
+<meta name="theme-color" content="#0b0f12">
+<meta property="og:title" content="Filtering by IIR or FIR — KBLsystems Audio Lab">
+<meta property="og:description" content="On the bench is a laptop with Audacity open on one side and a Smaart transfer function on the other. Before we argue about IIR or FIR, it helps to look at what the audio actually is. Before we dive into the depths of…">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('kbl-theme');if(!t)t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="wrap site-header__inner">
+<a class="brand" href="../index.html"><span class="brand__mark"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="2" y="14" width="3.2" height="8" rx=".8"/><rect x="7.6" y="10" width="3.2" height="12" rx=".8"/><rect x="13.2" y="6" width="3.2" height="16" rx=".8"/><rect x="18.8" y="2" width="3.2" height="20" rx=".8"/></svg></span><span><span class="brand__name">KBLsystems</span><span class="brand__sub">Audio Lab</span></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../labels/x-over-setup.html">X-over</a><a href="../labels/stm32.html">STM32</a><a href="../labels/fir-filtering.html" aria-current="page">FIR</a><a href="../labels/past-projects.html">Past</a><a href="../about.html">About</a></nav>
+<div class="header-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" stroke-linecap="round"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke-linejoin="round"/></svg></button></div>
+</div>
+</header>
+<div class="read-progress" data-progress></div><main id="main" data-article>
+<div class="wrap">
+<header class="article-head"><span class="kicker">FIR filtering field note</span><h1>Filtering by IIR or FIR</h1><div class="article-meta"><span>Oct 2021</span><span class="dot"></span><a class="tag" href="../labels/fir-filtering.html">FIR filtering</a><span class="dot"></span><span>3 min read</span><span class="dot"></span><span>By Thei Munten</span></div></header>
+<div class="article-layout"><article class="article-body"><div class="prose"><p>On the bench is a laptop with Audacity open on one side and a Smaart transfer function on the other. Before we argue about IIR or FIR, it helps to look at what the audio actually is.</p>
+<h2 id="part-1">Part 1</h2>
+<p>Before we dive into the depths of FIR or IIR filtering, let's talk about audio in general.</p>
+<p>We have this custom in audio engineering of analysing everything in the frequency domain. Apparently we inherited it from electrical engineering. It does seem quite logical, after all music is all about sine waves, right?</p>
+<p>Wrong!</p>
+<p>Look at some recording you made with your favourite DAW (<a href="https://www.audacityteam.org/" rel="noopener noreferrer" target="_blank">Audacity</a>, for example).</p>
+<figure class="post-figure"><a class="lightbox-link" data-lightbox="" href="../assets/img/filtering-by-iir-or-fir/01.png"><img alt="Audacity window showing a stereo waveform of a recording, with no visible sine waves" class="post-figure-img" decoding="async" height="570" loading="lazy" src="../assets/img/filtering-by-iir-or-fir/01.png" width="891" srcset="../assets/img/filtering-by-iir-or-fir/01-480.webp 480w, ../assets/img/filtering-by-iir-or-fir/01.png 891w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>The signal, in stereo, can look something like this. It is the equivalent in voltage to the air pressure — or eventually the position of your eardrum — of the stuff we call sound. No sine wave in sight, is there?</p>
+<p>Another argument against the preoccupation with analysis in the frequency domain: tell me the frequency of a handclap, or the whistling wind, or all the consonants we use...</p>
+<p>Should we stop talking about sound in the frequency domain? No! But do realise we are using a model of reality when we do.</p>
+<h2 id="a-model-not-the-thing-itself">A model, not the thing itself</h2>
+<p>Years ago, through the work of <a href="https://en.wikipedia.org/wiki/Hermann_von_Helmholtz#Acoustics_and_aesthetics" rel="noopener noreferrer" target="_blank">Helmholtz</a> and <a href="https://en.wikipedia.org/wiki/Fourier_analysis" rel="noopener noreferrer" target="_blank">Fourier</a>, the method of decomposing a chunk of a recording like the one above into its sinusoidal components was worked out. (In fact Helmholtz wrote a paper on what happens after this decomposition; look for 'auditory roughness'.)</p>
+<p>And we now all have the computational power to use this analysis, via the <a href="https://en.wikipedia.org/wiki/Fast_Fourier_transform" rel="noopener noreferrer" target="_blank">FFT</a>. If you are not compelled by mathematics whatsoever, think about the FFT as follows: imagine a prism. It decomposes a light beam into the different waves it is built from, into those well-known rainbows. The FFT engine works in a similar way, decomposing a chunk of audio into its sinusoidal components.</p>
+<figure class="post-figure post-figure--thumb"><a class="lightbox-link" data-lightbox="" href="../assets/img/filtering-by-iir-or-fir/02.jpg"><img alt="Prism splitting a beam of white light into a rainbow spectrum" class="post-figure-img" decoding="async" height="194" loading="lazy" src="../assets/img/filtering-by-iir-or-fir/02.jpg" width="259" srcset="../assets/img/filtering-by-iir-or-fir/02.jpg 259w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<h2 id="minimum-phase-except-when-it-isnt">Minimum phase, except when it isn't</h2>
+<p>Now on to the topic at hand.</p>
+<p>In some other parts of this blog you can read about using a (dual) FFT analyser to get a frequency-domain analysis of your device under test. In DIY loudspeaker circles, a more common use will be <a href="https://www.roomeqwizard.com/" rel="noopener noreferrer" target="_blank">Room EQ Wizard, REW</a>, to obtain what they call frequency response (commonly abbreviated to FR). Mostly they forget about the 'phase' part of the Bode plot.</p>
+<p>That isn't really a bad thing. For the most part, a loudspeaker (and filtering) behaves as a <a href="https://en.wikipedia.org/wiki/Minimum_phase" rel="noopener noreferrer" target="_blank">minimum phase system</a>. Minimum phase (not minimal!) means that the phase response is dictated by the frequency (magnitude) response and vice versa.</p>
+<p>So an FR measurement also holds the information to derive the associated phase response. No magic here, just plain laws of physics. Every deviation you see from the frequency response must have a corresponding phase deviation from that desired 0-phase line. (All under the premise of 'minimum phase' or <a href="https://en.wikipedia.org/wiki/Linear_time-invariant_system" rel="noopener noreferrer" target="_blank">LTI</a>.)</p>
+<p>There is one big exception: all-pass filters! All-pass filters will have a typical phase response without anything reflected in the frequency response, and vice versa. If you think about it, an ideally crossed multi-speaker system will have a flat FR and an overall all-pass phase behaviour, as long as conventional IIR filters are used. Maybe something like this for a 2-way system:</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/filtering-by-iir-or-fir/03.png"><img alt="Smaart transfer function display showing impulse, phase and magnitude plots for a two-way system" class="post-figure-img" decoding="async" height="900" loading="lazy" src="../assets/img/filtering-by-iir-or-fir/03.png" width="1600" srcset="../assets/img/filtering-by-iir-or-fir/03-480.webp 480w, ../assets/img/filtering-by-iir-or-fir/03-960.webp 960w, ../assets/img/filtering-by-iir-or-fir/03-1600.webp 1600w, ../assets/img/filtering-by-iir-or-fir/03.png 1600w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<h2 id="phase-is-not-delay">Phase is not delay</h2>
+<p>If you are still uncomfortable with the concept of phase, don't worry too much. Just don't confuse phase and delay. As defined elsewhere in this blog, we use the word phase (-difference) for that part of the overall frequency-dependent time difference between two components where plain, simple 'excess delay' is stripped away. So:</p>
+<p><b>Time alignment does not equal phase alignment!!</b></p>
+<p>('Time' alignment as a scientific term is a bit Einstein-esque; it is signal alignment... but hey.)</p>
+<p><a href="../posts/filtering-by-fir.html">...onto FIR filtering part 2 →</a></p></div><nav class="postnav" aria-label="More notes"><a href="../posts/practical-fir.html"><span class="mono">&larr; Previous note</span><strong>Practical FIR</strong></a><a href="../posts/filtering-by-fir.html"><span class="mono">Next note &rarr;</span><strong>Filtering by FIR</strong></a></nav></article>
+<aside class="article-rail">
+<div class="rail-box"><h2>Note details</h2><div class="rail-stats"><div><span>Published</span><b>Oct 2021</b></div><div><span>Reading</span><b>3 min</b></div><div><span>Words</span><b>634</b></div><div><span>Figures</span><b>3</b></div></div></div>
+<div class="rail-box"><h2>Filed under</h2><div class="chips"><a class="chip" href="../labels/blurbs.html">Blurbs</a><a class="chip" href="../labels/fir-filtering.html">FIR filtering</a></div></div>
+<div class="rail-box"><h2>In this note</h2><div class="toc-list"><a class="toc-l2" href="#part-1">Part 1</a><a class="toc-l2" href="#a-model-not-the-thing-itself">A model, not the thing itself</a><a class="toc-l2" href="#minimum-phase-except-when-it-isnt">Minimum phase, except when it isn&#x27;t</a><a class="toc-l2" href="#phase-is-not-delay">Phase is not delay</a></div></div>
+<div class="rail-box"><h2>Read next</h2><div class="rail-list"><a href="../posts/practical-fir.html"><img src="../assets/img/practical-fir/01.png" srcset="../assets/img/practical-fir/01-480.webp 480w, ../assets/img/practical-fir/01-960.webp 960w, ../assets/img/practical-fir/01.png 979w" sizes="60px" width="979" height="616" alt="Practical FIR" loading="lazy" decoding="async"><span>Practical FIR</span></a><a href="../posts/filtering-by-fir.html"><img src="../assets/img/filtering-by-fir/01.jpg" srcset="../assets/img/filtering-by-fir/01.jpg 300w" sizes="60px" width="300" height="300" alt="Filtering by FIR" loading="lazy" decoding="async"><span>Filtering by FIR</span></a></div></div>
+<div class="rail-box"><h2>About</h2><p>Research notes by Thei Munten, sound engineer and audio researcher. Measurement-led, always.</p><p style="margin-top:10px"><a href="../about.html" style="color:var(--accent);text-decoration:none">About the lab &rarr;</a></p></div>
+</aside></div>
+</div>
+</main>
+<footer class="site-footer">
+<div class="wrap footer-inner">
+<div class="footer-brand"><strong>KBLsystems Audio Lab</strong>A local static archive of 29 notes on sound reproduction, measurement and the machines that make it happen.</div>
+<div class="footer-links"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../about.html">About</a><a href="../examples/index.html">Design study</a><a href="https://kblsystems.blogspot.com/" target="_blank" rel="noopener noreferrer">Original blog</a></div>
+</div>
+</footer>
+</body></html>

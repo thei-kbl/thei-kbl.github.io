@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STM32 audio processing part3 — KBLsystems Audio Lab</title>
+<meta name="description" content="On the bench is a cheap Pmod I²S2 ADDA board, a tangle of Dupont wires and an STM32F407. It is the quickest way to get audio in and out of an MCU, and it is also where the HAL bugs start to show. If you are really…">
+<meta name="author" content="Thei Munten">
+<meta name="theme-color" content="#0b0f12">
+<meta property="og:title" content="STM32 audio processing part3 — KBLsystems Audio Lab">
+<meta property="og:description" content="On the bench is a cheap Pmod I²S2 ADDA board, a tangle of Dupont wires and an STM32F407. It is the quickest way to get audio in and out of an MCU, and it is also where the HAL bugs start to show. If you are really…">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('kbl-theme');if(!t)t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="wrap site-header__inner">
+<a class="brand" href="../index.html"><span class="brand__mark"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="2" y="14" width="3.2" height="8" rx=".8"/><rect x="7.6" y="10" width="3.2" height="12" rx=".8"/><rect x="13.2" y="6" width="3.2" height="16" rx=".8"/><rect x="18.8" y="2" width="3.2" height="20" rx=".8"/></svg></span><span><span class="brand__name">KBLsystems</span><span class="brand__sub">Audio Lab</span></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../labels/x-over-setup.html">X-over</a><a href="../labels/stm32.html" aria-current="page">STM32</a><a href="../labels/fir-filtering.html">FIR</a><a href="../labels/past-projects.html">Past</a><a href="../about.html">About</a></nav>
+<div class="header-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" stroke-linecap="round"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke-linejoin="round"/></svg></button></div>
+</div>
+</header>
+<div class="read-progress" data-progress></div><main id="main" data-article>
+<div class="wrap">
+<header class="article-head"><span class="kicker">STM32 field note</span><h1>STM32 audio processing part3</h1><div class="article-meta"><span>Oct 2021</span><span class="dot"></span><a class="tag" href="../labels/stm32.html">STM32</a><span class="dot"></span><span>2 min read</span><span class="dot"></span><span>By Thei Munten</span></div></header>
+<div class="article-layout"><article class="article-body"><div class="prose"><p>On the bench is a cheap Pmod I²S2 ADDA board, a tangle of Dupont wires and an STM32F407. It is the quickest way to get audio in and out of an MCU, and it is also where the HAL bugs start to show.</p>
+<p>If you are really stubborn enough to get this audio processing thing going on an STM32 MCU, you might have discovered the excellent video series by <a href="https://www.youtube.com/watch?v=lNBrGOk0XzE&amp;t=967s" rel="noopener noreferrer" target="_blank">YetAnotherElectronicChannel</a>.</p>
+<p>He uses one of those relatively cheap I²S boards from Pmod, stocked with Cirrus Logic chips. The big advantage of these tiny ADDA converters is that they don't need extra programming over I²C or SPI.</p>
+<figure class="post-figure post-figure--thumb"><a class="lightbox-link" data-lightbox="" href="../assets/img/stm32-audio-processing-part3/01.png"><img alt="Pmod I2S2 stereo audio input and output board with 3.5 mm jacks and a 12-pin header" class="post-figure-img" decoding="async" height="220" loading="lazy" src="../assets/img/stm32-audio-processing-part3/01.png" width="220" srcset="../assets/img/stm32-audio-processing-part3/01.png 220w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>Sonically they are not the most brilliant and are rather susceptible to all kinds of weird interference. But to get the concept going: just fine.</p>
+<p>I will not repeat everything he says about circular buffers or data type casting, so check those videos first. There are some problems, though.</p>
+<h2 id="one-bug-one-conceptual-error">One bug, one conceptual error</h2>
+<p>One of the most commonly used groups of STM chips is the STM32F407 (and 405). If you are going to use the HAL libraries — yes, you will — be aware that there is one bug and one conceptual error in the libraries used in full-duplex mode.</p>
+<p>For future reference:</p>
+<p>1. The DMA complete does not trigger the HAL_CompleteCallback.<br>2. Both DMA interrupts (send and receive) do trigger the callback, if you get 1 going.</p>
+<p><a href="https://github.com/STMicroelectronics/stm32f4xx_hal_driver/issues/1" rel="noopener noreferrer" target="_blank">STM32F4 HAL driver issue #1</a></p>
+<p>In my comments on the YetAnotherElectronic videos and in that bug report you can find the workaround. Be aware that if you change the HAL libraries, CubeMX will change them back if you use the regenerate-code option.</p>
+<p>Edit Feb 2022: somebody finally rewrote the HAL I²S EX libraries. Yeee!</p>
+<h2 id="a-dedicated-board">A dedicated board</h2>
+<p>Now, with all that going, wouldn't it be nice to have a dedicated board instead of everything breadboarded and Dupont-wired?</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/stm32-audio-processing-part3/02.jpg"><img alt="Early custom STM32 ADDA board with through-hole capacitors and SMD components" class="post-figure-img" decoding="async" height="1200" loading="lazy" src="../assets/img/stm32-audio-processing-part3/02.jpg" width="1600" srcset="../assets/img/stm32-audio-processing-part3/02-480.webp 480w, ../assets/img/stm32-audio-processing-part3/02-960.webp 960w, ../assets/img/stm32-audio-processing-part3/02-1600.webp 1600w, ../assets/img/stm32-audio-processing-part3/02.jpg 1600w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>This is one of my early attempts with some never-heard-of Chinese brand of ADDA that actually works quite well.</p>
+<p>Again the mix of 'audiophile' capacitors in THT and SMD components. Which is much easier nowadays, as PCB manufacturers also provide SMD assembly services.</p></div><nav class="postnav" aria-label="More notes"><a href="../posts/filtering-by-fir.html"><span class="mono">&larr; Previous note</span><strong>Filtering by FIR</strong></a><a href="../posts/image-slider.html"><span class="mono">Next note &rarr;</span><strong>Image slider</strong></a></nav></article>
+<aside class="article-rail">
+<div class="rail-box"><h2>Note details</h2><div class="rail-stats"><div><span>Published</span><b>Oct 2021</b></div><div><span>Reading</span><b>2 min</b></div><div><span>Words</span><b>355</b></div><div><span>Figures</span><b>2</b></div></div></div>
+<div class="rail-box"><h2>Filed under</h2><div class="chips"><a class="chip" href="../labels/blurbs.html">Blurbs</a><a class="chip" href="../labels/stm32.html">STM32</a></div></div>
+<div class="rail-box"><h2>In this note</h2><div class="toc-list"><a class="toc-l2" href="#one-bug-one-conceptual-error">One bug, one conceptual error</a><a class="toc-l2" href="#a-dedicated-board">A dedicated board</a></div></div>
+<div class="rail-box"><h2>Read next</h2><div class="rail-list"><a href="../posts/stm32-in-final-product.html"><img src="../assets/img/stm32-in-final-product/04.jpg" srcset="../assets/img/stm32-in-final-product/04-480.webp 480w, ../assets/img/stm32-in-final-product/04-960.webp 960w, ../assets/img/stm32-in-final-product/04-1600.webp 1600w, ../assets/img/stm32-in-final-product/04.jpg 1600w" sizes="60px" width="1600" height="1200" alt="STM32 in final &#x27;product&#x27;" loading="lazy" decoding="async"><span>STM32 in final &#x27;product&#x27;</span></a><a href="../posts/using-st32f4-series-mcu-as-loudspeaker.html"><img src="../assets/img/using-st32f4-series-mcu-as-loudspeaker/01.jpg" srcset="../assets/img/using-st32f4-series-mcu-as-loudspeaker/01.jpg 207w" sizes="60px" width="207" height="244" alt="Using STM32F4 series MCU as a loudspeaker processor" loading="lazy" decoding="async"><span>Using STM32F4 series MCU as a loudspeaker processor</span></a></div></div>
+<div class="rail-box"><h2>About</h2><p>Research notes by Thei Munten, sound engineer and audio researcher. Measurement-led, always.</p><p style="margin-top:10px"><a href="../about.html" style="color:var(--accent);text-decoration:none">About the lab &rarr;</a></p></div>
+</aside></div>
+</div>
+</main>
+<footer class="site-footer">
+<div class="wrap footer-inner">
+<div class="footer-brand"><strong>KBLsystems Audio Lab</strong>A local static archive of 29 notes on sound reproduction, measurement and the machines that make it happen.</div>
+<div class="footer-links"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../about.html">About</a><a href="../examples/index.html">Design study</a><a href="https://kblsystems.blogspot.com/" target="_blank" rel="noopener noreferrer">Original blog</a></div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STM32 in final &#x27;product&#x27; — KBLsystems Audio Lab</title>
+<meta name="description" content="On the bench is the latest board I developed: a compact STM32F4 loudspeaker processor with its converters, connectors and a mains transformer. The global chip shortage has stalled it a bit, but the software side is…">
+<meta name="author" content="Thei Munten">
+<meta name="theme-color" content="#0b0f12">
+<meta property="og:title" content="STM32 in final &#x27;product&#x27; — KBLsystems Audio Lab">
+<meta property="og:description" content="On the bench is the latest board I developed: a compact STM32F4 loudspeaker processor with its converters, connectors and a mains transformer. The global chip shortage has stalled it a bit, but the software side is…">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('kbl-theme');if(!t)t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="wrap site-header__inner">
+<a class="brand" href="../index.html"><span class="brand__mark"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="2" y="14" width="3.2" height="8" rx=".8"/><rect x="7.6" y="10" width="3.2" height="12" rx=".8"/><rect x="13.2" y="6" width="3.2" height="16" rx=".8"/><rect x="18.8" y="2" width="3.2" height="20" rx=".8"/></svg></span><span><span class="brand__name">KBLsystems</span><span class="brand__sub">Audio Lab</span></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../labels/x-over-setup.html">X-over</a><a href="../labels/stm32.html" aria-current="page">STM32</a><a href="../labels/fir-filtering.html">FIR</a><a href="../labels/past-projects.html">Past</a><a href="../about.html">About</a></nav>
+<div class="header-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" stroke-linecap="round"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke-linejoin="round"/></svg></button></div>
+</div>
+</header>
+<div class="read-progress" data-progress></div><main id="main" data-article>
+<div class="wrap">
+<header class="article-head"><span class="kicker">STM32 field note</span><h1>STM32 in final &#x27;product&#x27;</h1><div class="article-meta"><span>Nov 2021</span><span class="dot"></span><a class="tag" href="../labels/stm32.html">STM32</a><span class="dot"></span><span>3 min read</span><span class="dot"></span><span>By Thei Munten</span></div></header>
+<div class="article-layout"><article class="article-body"><div class="prose"><p>On the bench is the latest board I developed: a compact STM32F4 loudspeaker processor with its converters, connectors and a mains transformer. The global chip shortage has stalled it a bit, but the software side is ready. This is the round-up of how I got there.</p>
+<p>Let me write a round-up of this research on using an MCU as a speaker processor.</p>
+<p>By this time I had switched from KEIL MDK to <a href="https://www.st.com/en/development-tools/stm32cubeide.html" rel="noopener noreferrer" target="_blank">STM32CubeIDE</a>, which at this moment (November 2021) seems to be the weapon of choice for most ST developers.</p>
+<h2 id="getting-the-dsp-library-in">Getting the DSP library in</h2>
+<p>Again, for future reference, a quick how-to on including a maths/DSP library.</p>
+<p>Together with your IDE installation, you will have installed some repositories for ARM software products. You are looking for the CMSIS/DSP libraries. The path will be something like <code>/STM32Cube/Repository/STM32Cube_FW_F4_V1.25.2/Drivers/CMSIS/DSP/</code> in your home directory on Linux. It will be similar on macOS or Windooz.</p>
+<figure class="post-figure"><a class="lightbox-link" data-lightbox="" href="../assets/img/stm32-in-final-product/01.png"><img alt="STM32CubeIDE Import File System dialog selecting the CMSIS DSP library source files" class="post-figure-img" decoding="async" height="620" loading="lazy" src="../assets/img/stm32-in-final-product/01.png" width="688" srcset="../assets/img/stm32-in-final-product/01-480.webp 480w, ../assets/img/stm32-in-final-product/01.png 688w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>Start a new project in the IDE, right-click the project name and choose <i>Create new source folder</i>. Name it DSP. Then right-click again, select <i>Import file system</i>, and select both the source (source) and header (include) files from the repository. Click Finish.</p>
+<p>Now you have both the source and header files in your project, but the compiler knows nothing about them. Right-click the project, open the project properties, find the compiler include path settings and add the new path. Check the screenshot.</p>
+<figure class="post-figure"><a class="lightbox-link" data-lightbox="" href="../assets/img/stm32-in-final-product/02.png"><img alt="STM32CubeIDE project properties with the CMSIS DSP include path added" class="post-figure-img" decoding="async" height="833" loading="lazy" src="../assets/img/stm32-in-final-product/02.png" width="969" srcset="../assets/img/stm32-in-final-product/02-480.webp 480w, ../assets/img/stm32-in-final-product/02-960.webp 960w, ../assets/img/stm32-in-final-product/02.png 969w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>Now you can include all those nice ARM DSP tricks with <code>#include "arm_math.h"</code>. Try to build — embedded speak for compile — and you will get hundreds of errors. If you check the first ones, you will see that the compiler needs two preprocessor directives. Find them in the properties and add both: <code>ARM_MATH_CM4</code> (we are using an M4 core) and <code>__FPU_PRESENT = 1U</code> (yes, we do have a floating-point doohickey in our processor). Oh, and that's two underscores: <code>__</code>.</p>
+<p>Now you can start programming your code using block processing, taking chunks of, say, 48 samples, and using the increased efficiency of the <a href="https://www.keil.com/pack/doc/CMSIS/DSP/html/group__groupFilters.html" rel="noopener noreferrer" target="_blank">CMSIS libraries</a>. Check all those filtering functions!</p>
+<h2 id="the-low-frequency-trick">The low-frequency trick</h2>
+<p>There is loads to discover, but let me disclose this one.</p>
+<p>Decades ago I met <a href="https://en.wikipedia.org/wiki/Ed_Long_(audio_engineer)" rel="noopener noreferrer" target="_blank">Ed Long</a> — yup, the guy who 'invented' time alignment — at a pro-audio trade fair. He demonstrated his closed-box, single 15-inch sub. It was astounding, as was the excursion. His trick was to use electronics branded as <a href="https://bagend.com/wp-content/uploads/2014/09/ELFM.pdf" rel="noopener noreferrer" target="_blank">ELF</a> and not filters to EQ the sub.</p>
+<p>Much later, Linkwitz developed a filtering method known as the <a href="https://www.linkwitzlab.com/filters.htm" rel="noopener noreferrer" target="_blank">Linkwitz Transform</a>, a similar way to correct the response of a subwoofer.</p>
+<figure class="post-figure post-figure--thumb"><a class="lightbox-link" data-lightbox="" href="../assets/img/stm32-in-final-product/03.gif"><img alt="Frequency response equalisation plot showing original, target and equaliser curves" class="post-figure-img" decoding="async" height="282" loading="lazy" src="../assets/img/stm32-in-final-product/03.gif" width="431" srcset="../assets/img/stm32-in-final-product/03.gif 431w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>I never got any good results with this method, because professional DSPs don't provide a way to import your own biquad coefficients. And using shelving filters and EQ will never have the required precision.</p>
+<p>While using this CMSIS library function:</p>
+<div class="table-wrap"><table class="memberdecls"><tbody><tr><td>void</td><td><b>arm_biquad_cas_df1_32x64_q31</b> (const arm_biquad_cas_df1_32x64_ins_q31 *S, const q31_t *pSrc, q31_t *pDst, uint32_t blockSize)</td></tr><tr><td> </td><td>Processing function for the Q31 Biquad cascade 32x64 filter.</td></tr></tbody></table></div>
+<p>I managed to reproduce that sensation I had at that trade fair decades ago. Thanks, Ed!</p>
+<p>Do understand that you really, really need the above precision in fixed point to get decent results. If you are into the math: understand how a biquad calculation works and how the representation of coefficients (all close to the unity circle) affects the calculations at very low frequencies.</p>
+<p>(Anyone remember we at some point — 2010? — got this 'use for better LF response' checkbox in London Architect?)</p>
+<h2 id="the-latest-board">The latest board</h2>
+<p>→ Oh, and this is the latest board I developed, everything being stalled a bit by the global chip shortage:</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/stm32-in-final-product/04.jpg"><img alt="Latest STM32F4 loudspeaker processor board with mains transformer, connectors and status LEDs" class="post-figure-img" decoding="async" height="1200" loading="lazy" src="../assets/img/stm32-in-final-product/04.jpg" width="1600" srcset="../assets/img/stm32-in-final-product/04-480.webp 480w, ../assets/img/stm32-in-final-product/04-960.webp 960w, ../assets/img/stm32-in-final-product/04-1600.webp 1600w, ../assets/img/stm32-in-final-product/04.jpg 1600w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure></div><nav class="postnav" aria-label="More notes"><a href="../posts/tac-scorpion-revival.html"><span class="mono">&larr; Previous note</span><strong>TAC Scorpion revival</strong></a><a href="../posts/practical-fir.html"><span class="mono">Next note &rarr;</span><strong>Practical FIR</strong></a></nav></article>
+<aside class="article-rail">
+<div class="rail-box"><h2>Note details</h2><div class="rail-stats"><div><span>Published</span><b>Nov 2021</b></div><div><span>Reading</span><b>3 min</b></div><div><span>Words</span><b>603</b></div><div><span>Figures</span><b>4</b></div></div></div>
+<div class="rail-box"><h2>Filed under</h2><div class="chips"><a class="chip" href="../labels/blurbs.html">Blurbs</a><a class="chip" href="../labels/stm32.html">STM32</a></div></div>
+<div class="rail-box"><h2>In this note</h2><div class="toc-list"><a class="toc-l2" href="#getting-the-dsp-library-in">Getting the DSP library in</a><a class="toc-l2" href="#the-low-frequency-trick">The low-frequency trick</a><a class="toc-l2" href="#the-latest-board">The latest board</a></div></div>
+<div class="rail-box"><h2>Read next</h2><div class="rail-list"><a href="../posts/stm32-audio-processing-part3.html"><img src="../assets/img/stm32-audio-processing-part3/02.jpg" srcset="../assets/img/stm32-audio-processing-part3/02-480.webp 480w, ../assets/img/stm32-audio-processing-part3/02-960.webp 960w, ../assets/img/stm32-audio-processing-part3/02-1600.webp 1600w, ../assets/img/stm32-audio-processing-part3/02.jpg 1600w" sizes="60px" width="1600" height="1200" alt="STM32 audio processing part3" loading="lazy" decoding="async"><span>STM32 audio processing part3</span></a><a href="../posts/using-st32f4-series-mcu-as-loudspeaker.html"><img src="../assets/img/using-st32f4-series-mcu-as-loudspeaker/01.jpg" srcset="../assets/img/using-st32f4-series-mcu-as-loudspeaker/01.jpg 207w" sizes="60px" width="207" height="244" alt="Using STM32F4 series MCU as a loudspeaker processor" loading="lazy" decoding="async"><span>Using STM32F4 series MCU as a loudspeaker processor</span></a></div></div>
+<div class="rail-box"><h2>About</h2><p>Research notes by Thei Munten, sound engineer and audio researcher. Measurement-led, always.</p><p style="margin-top:10px"><a href="../about.html" style="color:var(--accent);text-decoration:none">About the lab &rarr;</a></p></div>
+</aside></div>
+</div>
+</main>
+<footer class="site-footer">
+<div class="wrap footer-inner">
+<div class="footer-brand"><strong>KBLsystems Audio Lab</strong>A local static archive of 29 notes on sound reproduction, measurement and the machines that make it happen.</div>
+<div class="footer-links"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../about.html">About</a><a href="../examples/index.html">Design study</a><a href="https://kblsystems.blogspot.com/" target="_blank" rel="noopener noreferrer">Original blog</a></div>
+</div>
+</footer>
+</body></html>

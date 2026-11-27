@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Measuring and adjusting a X-over — KBLsystems Audio Lab</title>
+<meta name="description" content="part 3 : actual X-over setup Now we did acquire some dual FFT measurement tool and we did get some practice in measuring. So it&#x27;s time to dive into actual system tuning. First we have to establish…">
+<meta name="theme-color" content="#0b0f12">
+<meta property="og:title" content="Measuring and adjusting a X-over — KBLsystems Audio Lab">
+<meta property="og:description" content="part 3 : actual X-over setup Now we did acquire some dual FFT measurement tool and we did get some practice in measuring. So it&#x27;s time to dive into actual system tuning. First we have to establish…">
+<meta property="og:type" content="website">
+<link rel="icon" href="../shared/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('kbl-theme');if(!t)t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<script src="../shared/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="wrap header-bar">
+<a class="brand" href="index.html"><span class="brand__mark">KBL</span><span><span class="brand__name">Audio Lab</span><span class="brand__sub">KBLsystems</span></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="index.html">Index</a><a href="index.html?label=x-over-setup">X-over</a><a href="index.html?label=stm32">STM32</a><a href="index.html?label=fir-filtering">FIR</a><a href="about.html">About</a></nav>
+<div class="header-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" stroke-linecap="round"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke-linejoin="round"/></svg></button></div>
+</div>
+</header>
+<div class="ticker" aria-hidden="true"><div class="ticker__track"><span>Purpose built audio solutions</span><span>Measurement over myth</span><span>FIR &middot; IIR &middot; STM32</span><span>Loudspeaker crossovers</span><span>Purpose built audio solutions</span><span>Measurement over myth</span><span>FIR &middot; IIR &middot; STM32</span><span>Loudspeaker crossovers</span></div></div><div class="read-progress" data-progress></div><main id="main" data-article>
+<div class="wrap">
+<header class="article-head"><div class="article-head__bar"><span>KBL &middot; Field note</span><span><b>Sep 2021</b></span><span>3 min read</span></div><h1>Measuring and adjusting a X-over</h1><span class="kicker">part 3 : actual X-over setup</span><div class="article-meta"><span class="tag">X-over Setup</span><span>By Thei Klein</span><span>579 words</span><span>4 plates</span></div></header>
+<figure class="article-hero"><a class="lightbox-link" data-lightbox="" href="../../assets/img/measuring-and-adjusting-x-over/01.png"><img alt="Figure 1 from Measuring and adjusting a X-over" class="post-figure-img" decoding="async" height="900" loading="lazy" sizes="(min-width: 1000px) 720px, 92vw" src="../../assets/img/measuring-and-adjusting-x-over/01.png" srcset="../../assets/img/measuring-and-adjusting-x-over/01-480.webp 480w, ../../assets/img/measuring-and-adjusting-x-over/01-960.webp 960w, ../../assets/img/measuring-and-adjusting-x-over/01-1600.webp 1600w, ../../assets/img/measuring-and-adjusting-x-over/01.png 1600w" width="1600"/></a><figcaption><span>Plate 01 &middot; Measuring and adjusting a X-over</span><span>X-over Setup</span></figcaption><span class="hero-tag">X-over Setup</span></figure>
+<div class="article-layout"><article class="article-body"><div class="prose"><p>Now we did acquire some dual FFT measurement tool and we did get some practice in measuring. 
+So it's time to dive into actual system tuning.First we have to establish some design goals:I think there will be no doubt that, at first instance, we will go for a flat magnitude response. 
+Sure, certainly in live audio there is a big preference for sloped responses. 
+Be it a smiley curve or more seriously a sloped curve towards the sub end. (upwards that is ;) 
+But imho this is part of a sound engineers 'artistic' input in a same way as EQ-ing a system to his/her preference is. 
+Other people <i>(with whom I don't always agree :)</i> have called this toning (as opposed to tuning) a system.A bit more complicated design goal will be to try to achieve an even controlled response off axis as well. 
+Why? 
+Not only will there be (paying?) people listening off axis; anywhere you listen to music, in enclosed spaces, there will be acoustics. 
+So also sound radiated off axis will (at a certain point) reach your (on axis being) ears.One way to achieve this is by using  the well known <a href="http://en.wikipedia.org/wiki/Linkwitz%E2%80%93Riley_filter" rel="noopener noreferrer" target="_blank">Linkwitz-Riley X-over</a> tuning. 
+Acoustically that is!  
+So if we would be applying a 24dB LR x-over in the electrical domain doesn't this necessarily give us an acoustic LR behaviour!A simple trick to see what a desired 24 dB filter would look like in your measurement. 
+Just connect the output of your X-over to the measurement input, select a desired X-over trace and presto: </p><p><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjkr-aeCmDawlTgrPPqgEkXMUG47wzAm4r_Pgzr7VWHcwbAGN2PRCg2l7fT8AL5_M5A-poXBQi-zejOIW1vnKKcRUD7GAbfHBLOShMZAYU4qeILIQn2gXPvR5xPXS-xs4gO4jZ98zHblQ0X/s1600/24dB+LR+1600.png" rel="noopener noreferrer" target="_blank"> </a>
+Here you have it,  1600 Hz /24 dB X-over LR style as a target trace. 
+Don't get confused by the out of band nonsense, no coherence there so no viable measurement data.<i> (actually should have faded this, now where's that button in Smaart, hmm)</i>Now let see if we can take that measurement from that previous 12' horn loaded cabinet and see if we can give it a LR alignment.</p><figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../../assets/img/measuring-and-adjusting-x-over/02.png"><img alt="Figure 2 from Measuring and adjusting a X-over" class="post-figure-img" decoding="async" height="900" loading="lazy" sizes="(min-width: 1000px) 720px, 92vw" src="../../assets/img/measuring-and-adjusting-x-over/02.png" srcset="../../assets/img/measuring-and-adjusting-x-over/02-480.webp 480w, ../../assets/img/measuring-and-adjusting-x-over/02-960.webp 960w, ../../assets/img/measuring-and-adjusting-x-over/02-1600.webp 1600w, ../../assets/img/measuring-and-adjusting-x-over/02.png 1600w" width="1600"/></a></figure><p> 
+Seems reasonable, hein? 
+Now look closely and you will notice in the bottom corner the soundweb setting: 
+2800Hz / 12 dB bessel! 
+Didn't expect that to work out for an acoustic filter of 1600Hz / 24dB?We can now continu to see if the 1' driver horn will combine in the same way. 
+Remember I am measuring everything with music so at the same time I am listening if it sounds anywhere near ok.</p><figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../../assets/img/measuring-and-adjusting-x-over/03.png"><img alt="Figure 3 from Measuring and adjusting a X-over" class="post-figure-img" decoding="async" height="900" loading="lazy" sizes="(min-width: 1000px) 720px, 92vw" src="../../assets/img/measuring-and-adjusting-x-over/03.png" srcset="../../assets/img/measuring-and-adjusting-x-over/03-480.webp 480w, ../../assets/img/measuring-and-adjusting-x-over/03-960.webp 960w, ../../assets/img/measuring-and-adjusting-x-over/03-1600.webp 1600w, ../../assets/img/measuring-and-adjusting-x-over/03.png 1600w" width="1600"/></a></figure><p>Again if you try to read the small figures: 
+2300Hz / 12 dB Bessel! 
+From the days I still had to do these things by ear I have a real preference for Bessel filters, 25 years later this finally seems to make sense  ;) 
+<i>(actually I am going to set up this cab with 18 db Bessels but these are not implemented in SW9088)</i>Final picture?</p><figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../../assets/img/measuring-and-adjusting-x-over/04.png"><img alt="Figure 4 from Measuring and adjusting a X-over" class="post-figure-img" decoding="async" height="900" loading="lazy" sizes="(min-width: 1000px) 720px, 92vw" src="../../assets/img/measuring-and-adjusting-x-over/04.png" srcset="../../assets/img/measuring-and-adjusting-x-over/04-480.webp 480w, ../../assets/img/measuring-and-adjusting-x-over/04-960.webp 960w, ../../assets/img/measuring-and-adjusting-x-over/04-1600.webp 1600w, ../../assets/img/measuring-and-adjusting-x-over/04.png 1600w" width="1600"/></a></figure><p> 
+Microphone is now further away so this is why things start to get more bumpie again. 
+(for educational purposes unfortunately also in the X-region, no, no, this not a x-over artefact ;)Are we finished now? 
+No, but this is a start. We can now start to compare this with different solutions.Am I anywhere cheating here? 
+No, but I' am not telling you the whole story <i>(see, this is my business, remember ;)</i> 
+There is a lot more to be said about adjusting delay, applying EQ at the right places etc etc You can read in between the lines though...</p></div><nav class="postnav" aria-label="More notes"><a href="filtering-by-iir-or-fir.html"><span class="mono">&larr; Previous note</span><strong>Filtering by IIR or FIR</strong></a><span></span></nav></article><aside class="article-rail">
+<div class="rail-box rail-box--acid"><h2>From the lab</h2><p>Measurement over myth. Every claim gets a plot.</p></div>
+<div class="rail-box"><h2>Note data</h2><div class="rail-stats"><div><span>Date</span><b>Sep 2021</b></div><div><span>Read</span><b>3 min</b></div><div><span>Words</span><b>579</b></div><div><span>Plates</span><b>4</b></div></div></div>
+<div class="rail-box"><h2>Next up</h2><div class="rail-list"><a href="stm32-in-final-product.html"><img src="../../assets/img/stm32-in-final-product/04.jpg" alt="" loading="lazy"><strong>STM32 in final &#x27;product&#x27;</strong></a><a href="filtering-by-iir-or-fir.html"><img src="../../assets/img/filtering-by-iir-or-fir/01.png" alt="" loading="lazy"><strong>Filtering by IIR or FIR</strong></a></div></div>
+</aside></div>
+</div>
+</main><footer class="site-footer"><div class="wrap footer-inner"><div class="footer-brand"><strong>KBLsystems Audio Lab</strong>Research notes on sound reproduction, measurement and the machines that make it happen.</div><div class="footer-links"><a href="index.html">Index</a><a href="about.html">About</a><a href="https://kblsystems.blogspot.com/" target="_blank" rel="noopener noreferrer">Original blog</a></div></div><div class="wrap" style="margin-top:26px;font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase">&copy; 2026 KBLsystems &middot; Static concept C &middot; All content by Thei Klein</div></footer><div class="design-dock" data-dock><div class="design-dock__menu" id="concept-menu"><small>Design concepts</small><a href="../a-dark-studio/index.html" class="">A &middot; Dark Studio</a><a href="../b-light-editorial/index.html" class="">B &middot; Light Editorial</a><a href="../c-magazine-bold/index.html" class="is-active">C &middot; Magazine Bold</a></div><button class="design-dock__toggle" type="button" data-dock-toggle aria-expanded="false" aria-controls="concept-menu">Concepts <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m2.5 7.5 3.5-3 3.5 3" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></body></html>

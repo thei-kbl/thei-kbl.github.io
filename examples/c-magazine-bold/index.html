@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KBLsystems Audio Lab — Hear it. Measure it. Prove it.</title>
+<meta name="description" content="Bold field notes on audio reproduction: crossovers, FIR filtering and STM32 audio processing.">
+<meta name="theme-color" content="#0b0f12">
+<meta property="og:title" content="KBLsystems Audio Lab — Hear it. Measure it. Prove it.">
+<meta property="og:description" content="Bold field notes on audio reproduction: crossovers, FIR filtering and STM32 audio processing.">
+<meta property="og:type" content="website">
+<link rel="icon" href="../shared/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('kbl-theme');if(!t)t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<script src="../shared/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="wrap header-bar">
+<a class="brand" href="index.html"><span class="brand__mark">KBL</span><span><span class="brand__name">Audio Lab</span><span class="brand__sub">KBLsystems</span></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="index.html" aria-current="page">Index</a><a href="index.html?label=x-over-setup">X-over</a><a href="index.html?label=stm32">STM32</a><a href="index.html?label=fir-filtering">FIR</a><a href="about.html">About</a></nav>
+<div class="header-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" stroke-linecap="round"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke-linejoin="round"/></svg></button></div>
+</div>
+</header>
+<div class="ticker" aria-hidden="true"><div class="ticker__track"><span>Purpose built audio solutions</span><span>Measurement over myth</span><span>FIR &middot; IIR &middot; STM32</span><span>Loudspeaker crossovers</span><span>Purpose built audio solutions</span><span>Measurement over myth</span><span>FIR &middot; IIR &middot; STM32</span><span>Loudspeaker crossovers</span></div></div><main id="main">
+<div class="wrap">
+<section class="hero">
+<div class="hero__grid">
+<div class="hero__kicker"><span class="stamp">KBL / 001</span><span>Audio reproduction &middot; measured</span></div>
+<h1>Hear it.<br><span class="outline">Measure it.</span><br><span class="hl">Prove it.</span></h1>
+<aside class="hero__aside"><figure class="hero__figure"><img src="../../assets/img/home/01.jpg" srcset="../../assets/img/home/01-480.webp 480w, ../../assets/img/home/01-960.webp 960w, ../../assets/img/home/01-1600.webp 1600w, ../../assets/img/home/01.jpg 1600w" sizes="(min-width: 1060px) 360px, 92vw" width="1600" height="1200" alt="KBLsystems loudspeaker build" loading="eager" decoding="async"><span class="caption">Field notes &mdash; vol. 01</span></figure></aside>
+<p class="hero__lead">Loudspeaker crossovers, FIR and IIR filtering, and STM32 microcontrollers turned into speaker processors. Research from the bench of Thei Klein.</p>
+<div class="hero__cta"><a class="btn" href="#notes">Open the notes <span class="arrow" aria-hidden="true">&rarr;</span></a></div>
+</div>
+<div class="mega-stats">
+<div class="mega-stat"><b>29</b><span>Notes<br>from the bench</span></div>
+<div class="mega-stat"><b>5</b><span>Topics<br>X-over &middot; FIR &middot; STM32</span></div>
+<div class="mega-stat"><b>2013</b><span>Writing<br>since</span></div>
+</div>
+</section>
+<section class="section" id="notes">
+<div class="section-head"><h2>The notes</h2><span class="mono">Search &amp; filter</span></div>
+<div class="filters-block">
+<div class="search-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4" stroke-linecap="round"/></svg><label class="visually-hidden" for="q">Search notes</label><input id="q" type="search" placeholder="Search titles and text…" data-search autocomplete="off"><kbd>/</kbd></div>
+<div class="filter-row"><div class="chips"><button class="chip is-active" type="button" data-chip="all" aria-pressed="true">All notes</button><button class="chip" type="button" data-chip="stm32" aria-pressed="false">STM32</button><button class="chip" type="button" data-chip="fir-filtering" aria-pressed="false">FIR filtering</button><button class="chip" type="button" data-chip="x-over-setup" aria-pressed="false">X-over Setup</button></div><span class="result-count" data-result-count><strong>3</strong> notes</span></div>
+</div>
+<div class="empty-state" data-empty hidden><strong>No notes found</strong>Try another search term or label.</div>
+<div class="mag-grid"><a class="mag-card" href="stm32-in-final-product.html" data-post-card data-labels="stm32" data-title="STM32 in final &#x27;product&#x27;" data-text="Let me write a round up of this research on using a MCU as a speaker processor. By this time I switched from KEILmdk to STM32CubeIDE which at this moment (november, 2021) seems to be the weapon of…">
+<div class="mag-card__top"><span class="mag-card__cat">STM32</span><span class="mag-card__num">NO. 01</span></div>
+<div class="mag-card__media"><img src="../../assets/img/stm32-in-final-product/04.jpg" srcset="../../assets/img/stm32-in-final-product/04-480.webp 480w, ../../assets/img/stm32-in-final-product/04-960.webp 960w, ../../assets/img/stm32-in-final-product/04-1600.webp 1600w, ../../assets/img/stm32-in-final-product/04.jpg 1600w" sizes="(min-width: 1060px) 560px, 92vw" width="1600" height="1200" alt="STM32 in final &#x27;product&#x27;" loading="lazy" decoding="async"></div>
+<div class="mag-card__body"><h3 class="mag-card__title">STM32 in final &#x27;product&#x27;</h3><p class="mag-card__excerpt">Let me write a round up of this research on using a MCU as a speaker processor. By this time I switched from KEILmdk to STM32CubeIDE which at this moment (november, 2021) seems to be the weapon of…</p>
+<div class="mag-card__foot"><span>Nov 2021 &middot; 3 min</span><span class="go">&rarr;</span></div></div></a><a class="mag-card" href="filtering-by-iir-or-fir.html" data-post-card data-labels="fir-filtering" data-title="Filtering by IIR or FIR" data-text="Part 1 Before we dive into the depths of FIR or IIR filtering, let&#x27;s talk about audio in general. We have this custom in Audio engineering of analysing everything in the frequency domain. Apparently…">
+<div class="mag-card__top"><span class="mag-card__cat">FIR filtering</span><span class="mag-card__num">NO. 02</span></div>
+<div class="mag-card__media"><img src="../../assets/img/filtering-by-iir-or-fir/01.png" srcset="../../assets/img/filtering-by-iir-or-fir/01-480.webp 480w, ../../assets/img/filtering-by-iir-or-fir/01.png 891w" sizes="(min-width: 1060px) 560px, 92vw" width="891" height="570" alt="Filtering by IIR or FIR" loading="lazy" decoding="async"></div>
+<div class="mag-card__body"><h3 class="mag-card__title">Filtering by IIR or FIR</h3><p class="mag-card__excerpt">Part 1 Before we dive into the depths of FIR or IIR filtering, let&#x27;s talk about audio in general. We have this custom in Audio engineering of analysing everything in the frequency domain. Apparently…</p>
+<div class="mag-card__foot"><span>Oct 2021 &middot; 3 min</span><span class="go">&rarr;</span></div></div></a><a class="mag-card" href="measuring-and-adjusting-x-over.html" data-post-card data-labels="x-over-setup" data-title="Measuring and adjusting a X-over" data-text="part 3 : actual X-over setup Now we did acquire some dual FFT measurement tool and we did get some practice in measuring. So it&#x27;s time to dive into actual system tuning. First we have to establish…">
+<div class="mag-card__top"><span class="mag-card__cat">X-over Setup</span><span class="mag-card__num">NO. 03</span></div>
+<div class="mag-card__media"><img src="../../assets/img/measuring-and-adjusting-x-over/01.png" srcset="../../assets/img/measuring-and-adjusting-x-over/01-480.webp 480w, ../../assets/img/measuring-and-adjusting-x-over/01-960.webp 960w, ../../assets/img/measuring-and-adjusting-x-over/01-1600.webp 1600w, ../../assets/img/measuring-and-adjusting-x-over/01.png 1600w" sizes="(min-width: 1060px) 560px, 92vw" width="1600" height="900" alt="Measuring and adjusting a X-over" loading="lazy" decoding="async"></div>
+<div class="mag-card__body"><h3 class="mag-card__title">Measuring and adjusting a X-over</h3><p class="mag-card__excerpt">part 3 : actual X-over setup Now we did acquire some dual FFT measurement tool and we did get some practice in measuring. So it&#x27;s time to dive into actual system tuning. First we have to establish…</p>
+<div class="mag-card__foot"><span>Sep 2021 &middot; 3 min</span><span class="go">&rarr;</span></div></div></a></div>
+</section>
+<section class="section">
+<div class="section-head"><h2>Also in the lab</h2><span class="mono">Projects &amp; themes</span></div>
+<div class="strip-list"><a class="strip" href="https://kblsystems.blogspot.com/search/label/current%20projects" target="_blank" rel="noopener noreferrer"><div class="strip__body"><span class="mono">Explore</span><h3>Current Project</h3><p>Powered loudspeakers, DSP boards and the ongoing STM32 experiments.</p></div><div class="strip__media"><img src="../../assets/img/home/01.jpg" srcset="../../assets/img/home/01-480.webp 480w, ../../assets/img/home/01-960.webp 960w, ../../assets/img/home/01-1600.webp 1600w, ../../assets/img/home/01.jpg 1600w" sizes="(min-width: 760px) 240px, 92vw" width="1600" height="1200" alt="Current Project" loading="lazy" decoding="async"></div></a><a class="strip" href="https://kblsystems.blogspot.com/search/label/past%20projects" target="_blank" rel="noopener noreferrer"><div class="strip__body"><span class="mono">Explore</span><h3>Past Projects</h3><p>Horns, restorations and systems from the live-sound years.</p></div><div class="strip__media"><img src="../../assets/img/home/02.jpg" srcset="../../assets/img/home/02-480.webp 480w, ../../assets/img/home/02-960.webp 960w, ../../assets/img/home/02-1600.webp 1600w, ../../assets/img/home/02.jpg 1600w" sizes="(min-width: 760px) 240px, 92vw" width="1600" height="1200" alt="Past Projects" loading="lazy" decoding="async"></div></a><a class="strip" href="https://kblsystems.blogspot.com/search/label/blurbs" target="_blank" rel="noopener noreferrer"><div class="strip__body"><span class="mono">Explore</span><h3>Immersion</h3><p>Notes on listening, perception and the limits of measurement.</p></div><div class="strip__media"><img src="../../assets/img/home/03.jpg" srcset="../../assets/img/home/03-480.webp 480w, ../../assets/img/home/03-960.webp 960w, ../../assets/img/home/03.jpg 1200w" sizes="(min-width: 760px) 240px, 92vw" width="1200" height="1600" alt="Immersion" loading="lazy" decoding="async"></div></a></div>
+</section>
+<div class="about-band"><div class="about-band__media"><img src="../../assets/img/site/thei.jpg" srcset="../../assets/img/site/thei.jpg 138w" sizes="(min-width: 760px) 260px, 92vw" width="138" height="179" alt="Thei Klein" loading="lazy" decoding="async"><span class="tag">Thei Klein</span></div><div class="about-band__body"><h2>Sound engineer. Researcher. Builder.</h2><p>My name is Thei. Welcome to my little spot on the internetz. I have been working many many years as a sound engineer and Sound&amp;Light contractor in (sub-) cultural live music. I nowadays concentrate on researching that miraculous construct we call Audio Reproduction.</p><p>Discovering and employing everything there is to know. Trying to work from a firm scientific background gathering all necessary knowledge and to redistribute in a hopefully comprehensive way without mentioning to much mathematics.</p><a class="read-link" href="about.html">About the lab</a></div></div>
+</div>
+</main><footer class="site-footer"><div class="wrap footer-inner"><div class="footer-brand"><strong>KBLsystems Audio Lab</strong>Research notes on sound reproduction, measurement and the machines that make it happen.</div><div class="footer-links"><a href="index.html">Index</a><a href="about.html">About</a><a href="https://kblsystems.blogspot.com/" target="_blank" rel="noopener noreferrer">Original blog</a></div></div><div class="wrap" style="margin-top:26px;font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase">&copy; 2026 KBLsystems &middot; Static concept C &middot; All content by Thei Klein</div></footer><div class="design-dock" data-dock><div class="design-dock__menu" id="concept-menu"><small>Design concepts</small><a href="../a-dark-studio/index.html" class="">A &middot; Dark Studio</a><a href="../b-light-editorial/index.html" class="">B &middot; Light Editorial</a><a href="../c-magazine-bold/index.html" class="is-active">C &middot; Magazine Bold</a></div><button class="design-dock__toggle" type="button" data-dock-toggle aria-expanded="false" aria-controls="concept-menu">Concepts <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m2.5 7.5 3.5-3 3.5 3" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></body></html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practical FIR — KBLsystems Audio Lab</title>
+<meta name="description" content="On the bench is a system that measures flat on the magnitude plot and still refuses to behave. That is usually where the FIR conversation starts. As ever so often in engineering, when some new technology is introduced…">
+<meta name="author" content="Thei Munten">
+<meta name="theme-color" content="#0b0f12">
+<meta property="og:title" content="Practical FIR — KBLsystems Audio Lab">
+<meta property="og:description" content="On the bench is a system that measures flat on the magnitude plot and still refuses to behave. That is usually where the FIR conversation starts. As ever so often in engineering, when some new technology is introduced…">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('kbl-theme');if(!t)t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="wrap site-header__inner">
+<a class="brand" href="../index.html"><span class="brand__mark"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="2" y="14" width="3.2" height="8" rx=".8"/><rect x="7.6" y="10" width="3.2" height="12" rx=".8"/><rect x="13.2" y="6" width="3.2" height="16" rx=".8"/><rect x="18.8" y="2" width="3.2" height="20" rx=".8"/></svg></span><span><span class="brand__name">KBLsystems</span><span class="brand__sub">Audio Lab</span></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../labels/x-over-setup.html">X-over</a><a href="../labels/stm32.html">STM32</a><a href="../labels/fir-filtering.html" aria-current="page">FIR</a><a href="../labels/past-projects.html">Past</a><a href="../about.html">About</a></nav>
+<div class="header-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" stroke-linecap="round"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke-linejoin="round"/></svg></button></div>
+</div>
+</header>
+<div class="read-progress" data-progress></div><main id="main" data-article>
+<div class="wrap">
+<header class="article-head"><span class="kicker">FIR filtering field note</span><h1>Practical FIR</h1><div class="article-meta"><span>Nov 2021</span><span class="dot"></span><a class="tag" href="../labels/fir-filtering.html">FIR filtering</a><span class="dot"></span><span>3 min read</span><span class="dot"></span><span>By Thei Munten</span></div></header>
+<div class="article-layout"><article class="article-body"><div class="prose"><p>On the bench is a system that measures flat on the magnitude plot and still refuses to behave. That is usually where the FIR conversation starts.</p>
+<h2 id="part-3">Part 3</h2>
+<p>As ever so often in engineering, when some new technology is introduced we go into 'nec plus ultra' mode. Suddenly you will find a huge range of applications where all and only is about that new tech. Same for FIR filtering.</p>
+<h2 id="fir-as-room-eq">FIR as room EQ</h2>
+<p>The first appearance of FIR in (DIY) audio was as a means to do room EQ. The idea was to measure a system's response in a room, do quite some averaging and apply an overall EQ that would correct all and everything.</p>
+<p>First, there is of course no such thing as room EQ: the only way to change the acoustics of a room is by changing its dimensions and/or changing the absorbing and reflecting surfaces. But the solution is better than using only conventional (minimum-phase) EQ, as we have been doing with our 31-band graphics.</p>
+<p>Some of the room effects are minimum phase, and thus one could use a graphic to try to address the problems. The definition of minimum-phase behaviour dictates that your ideal EQ point will have both the necessary magnitude and phase compensation. So for these minimum-phase phenomena the EQ will not introduce 'phase issues' (cringe).</p>
+<p>However, loads of stuff you would like to EQ in acoustics is not minimum phase. Remember playing a festival and, during nightfall, the HF content of your PA changes drastically? And changing your graphic EQ doesn't help in the way you wanted? Well, that's a non-minimum-phase phenomenon, and this would call for a linear-phase EQ, which as we know now is only possible with FIR.</p>
+<figure class="post-figure"><a class="lightbox-link" data-lightbox="" href="../assets/img/practical-fir/01.png"><img alt="rePhase screenshot showing phase and gain correction curves for a FIR filter" class="post-figure-img" decoding="async" height="616" loading="lazy" src="../assets/img/practical-fir/01.png" width="979" srcset="../assets/img/practical-fir/01-480.webp 480w, ../assets/img/practical-fir/01-960.webp 960w, ../assets/img/practical-fir/01.png 979w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<h2 id="the-line-array-problem">The line-array problem</h2>
+<p>Another example would be (conventional) EQ-ing across a line array. Hopefully everybody understands that you can't apply different EQ settings to different elements in your line array, right? The different phase behaviour of the different elements will in that case wreak havoc on the overall dispersion of the array. The only way you can get away with this is by using linear-phase EQ. Something that the French manufacturer of brown boxes does understand.</p>
+<p>So when and where to apply linear-phase FIR filters as a means of filtering without affecting phase is something that needs thought. It is not the miracle solution for everything; it is just another tool, and it does have pros and cons like any other tool.</p>
+<h2 id="when-phase-is-the-question">When phase is the question</h2>
+<p>So yes, as has been explained in a million places: FIR filters can be computationally heavy. But why should that be mentioned over and over as a problem?</p>
+<p>A more interesting difference, if you really want to set IIR versus FIR, is the way the precision of the calculations works out sonically. Fixed point versus floating point. Internal bit depth. The way rounding errors work in your algorithm. The audibility of pre-ringing (or not?). That sort of thing. In the MCU/DSP part of this blog I will write a bit about this.</p>
+<p>If all this is cleared, one big topic still needs to be debated:</p>
+<p><b>IS PHASE AUDIBLE?</b></p>
+<p><i>(Or, more precisely, does applying an all-pass filter change the way (stereo) audio is perceived?)</i></p>
+<p>One will understand that I (and my peers) have an opinion contrary to that of the big names in our industry. This is the internet: I can't demonstrate, but I encourage you to find out for yourself!</p></div><nav class="postnav" aria-label="More notes"><a href="../posts/stm32-in-final-product.html"><span class="mono">&larr; Previous note</span><strong>STM32 in final &#x27;product&#x27;</strong></a><a href="../posts/filtering-by-iir-or-fir.html"><span class="mono">Next note &rarr;</span><strong>Filtering by IIR or FIR</strong></a></nav></article>
+<aside class="article-rail">
+<div class="rail-box"><h2>Note details</h2><div class="rail-stats"><div><span>Published</span><b>Nov 2021</b></div><div><span>Reading</span><b>3 min</b></div><div><span>Words</span><b>574</b></div><div><span>Figures</span><b>1</b></div></div></div>
+<div class="rail-box"><h2>Filed under</h2><div class="chips"><a class="chip" href="../labels/blurbs.html">Blurbs</a><a class="chip" href="../labels/fir-filtering.html">FIR filtering</a></div></div>
+<div class="rail-box"><h2>In this note</h2><div class="toc-list"><a class="toc-l2" href="#part-3">Part 3</a><a class="toc-l2" href="#fir-as-room-eq">FIR as room EQ</a><a class="toc-l2" href="#the-line-array-problem">The line-array problem</a><a class="toc-l2" href="#when-phase-is-the-question">When phase is the question</a></div></div>
+<div class="rail-box"><h2>Read next</h2><div class="rail-list"><a href="../posts/filtering-by-iir-or-fir.html"><img src="../assets/img/filtering-by-iir-or-fir/03.png" srcset="../assets/img/filtering-by-iir-or-fir/03-480.webp 480w, ../assets/img/filtering-by-iir-or-fir/03-960.webp 960w, ../assets/img/filtering-by-iir-or-fir/03-1600.webp 1600w, ../assets/img/filtering-by-iir-or-fir/03.png 1600w" sizes="60px" width="1600" height="900" alt="Filtering by IIR or FIR" loading="lazy" decoding="async"><span>Filtering by IIR or FIR</span></a><a href="../posts/filtering-by-fir.html"><img src="../assets/img/filtering-by-fir/01.jpg" srcset="../assets/img/filtering-by-fir/01.jpg 300w" sizes="60px" width="300" height="300" alt="Filtering by FIR" loading="lazy" decoding="async"><span>Filtering by FIR</span></a></div></div>
+<div class="rail-box"><h2>About</h2><p>Research notes by Thei Munten, sound engineer and audio researcher. Measurement-led, always.</p><p style="margin-top:10px"><a href="../about.html" style="color:var(--accent);text-decoration:none">About the lab &rarr;</a></p></div>
+</aside></div>
+</div>
+</main>
+<footer class="site-footer">
+<div class="wrap footer-inner">
+<div class="footer-brand"><strong>KBLsystems Audio Lab</strong>A local static archive of 29 notes on sound reproduction, measurement and the machines that make it happen.</div>
+<div class="footer-links"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../about.html">About</a><a href="../examples/index.html">Design study</a><a href="https://kblsystems.blogspot.com/" target="_blank" rel="noopener noreferrer">Original blog</a></div>
+</div>
+</footer>
+</body></html>

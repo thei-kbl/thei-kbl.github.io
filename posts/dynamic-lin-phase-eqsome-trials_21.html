@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dynamic lin. phase EQ..some trials.. — part 2 — KBLsystems Audio Lab</title>
+<meta name="description" content="On the bench is the same DSP board, now running a crude dynamic linear-phase EQ in code. The first results are promising, but the code is as rough as the idea. The fun in coding your own DSP is that you quickly learn…">
+<meta name="author" content="Thei Munten">
+<meta name="theme-color" content="#0b0f12">
+<meta property="og:title" content="Dynamic lin. phase EQ..some trials.. — part 2 — KBLsystems Audio Lab">
+<meta property="og:description" content="On the bench is the same DSP board, now running a crude dynamic linear-phase EQ in code. The first results are promising, but the code is as rough as the idea. The fun in coding your own DSP is that you quickly learn…">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script>(function(){try{var t=localStorage.getItem('kbl-theme');if(!t)t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}})();</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="wrap site-header__inner">
+<a class="brand" href="../index.html"><span class="brand__mark"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="2" y="14" width="3.2" height="8" rx=".8"/><rect x="7.6" y="10" width="3.2" height="12" rx=".8"/><rect x="13.2" y="6" width="3.2" height="16" rx=".8"/><rect x="18.8" y="2" width="3.2" height="20" rx=".8"/></svg></span><span><span class="brand__name">KBLsystems</span><span class="brand__sub">Audio Lab</span></span></a>
+<nav class="site-nav" aria-label="Primary"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../labels/x-over-setup.html">X-over</a><a href="../labels/stm32.html">STM32</a><a href="../labels/fir-filtering.html">FIR</a><a href="../labels/past-projects.html">Past</a><a href="../about.html">About</a></nav>
+<div class="header-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7" stroke-linecap="round"/></svg><svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" stroke-linejoin="round"/></svg></button></div>
+</div>
+</header>
+<div class="read-progress" data-progress></div><main id="main" data-article>
+<div class="wrap">
+<header class="article-head"><span class="kicker">Current Projects field note</span><h1>Dynamic lin. phase EQ..some trials.. — part 2</h1><div class="article-meta"><span>Nov 2023</span><span class="dot"></span><a class="tag" href="../labels/current-projects.html">Current Projects</a><span class="dot"></span><span>3 min read</span><span class="dot"></span><span>By Thei Munten</span></div></header>
+<div class="article-layout"><article class="article-body"><div class="prose"><p>On the bench is the same DSP board, now running a crude dynamic linear-phase EQ in code. The first results are promising, but the code is as rough as the idea.</p>
+<h2 id="linear-phase-eq-part-2">Linear phase EQ, part 2</h2>
+<p>The fun in coding your own DSP is that you quickly learn this Egg of Columbus: once you free your mind of thinking in the frequency domain (paraphrasing Moroder), everything you dream up about multiplying functions in the frequency domain — like applying dynamic EQ — can be a rather simple arithmetic operation in the discrete sampled time domain.</p>
+<p>So EQ can work out as follows: apply the reverse filter to the signal stream on a sample-by-sample basis. Subtract that stream from the original stream, also sample by sample. Take care you do your calculation on the correct sample!</p>
+<p>Mind-boggling to realise that every single sample is a representation of the music playing right at that moment in time.</p>
+<pre><code>void doProces(q15_t* Lin, q15_t* Rin, q15_t* Lout, q15_t* Rout)
+{
+    arm_sub_q15(Rin, Lin, Mono, n);
+    arm_q15_to_float(Mono, Monofl, n); /* adding balanced input to mono signal */
+
+    arm_fir_f32(&amp;SLF, Monofl, Low, n);
+    arm_fir_f32(&amp;SHF, Monofl, High, n);
+    arm_fir_f32(&amp;SEQ, Monofl, EQout, n); /* several FIR filters */
+
+    /* RMS threshold + attack/release: blocksize=48, sample freq=48kHz --&gt; 1 mSec per callback */
+    arm_rms_f32(EQout, n, &amp;rms);
+    if ((rms &gt; 0.005) &amp;&amp; (gainEQ &lt;= 0.8)) {
+        gainEQ = gainEQ + 0.1;
+    }
+    if ((rms &lt; 0.005) &amp;&amp; (gainEQ &gt; 0)) {
+        gainEQ = gainEQ - 0.005;
+    }
+
+    /* scaling + actual EQ subtraction */
+    arm_scale_f32(EQout, gainEQ, EQout, n);
+    arm_sub_f32(High, EQout, Result, n);
+
+    /* revert float back to signed int. Lout = low, Rout = high */
+    arm_float_to_q15(Low, Lout, n);
+    arm_float_to_q15(Result, Rout, n);
+}</code></pre>
+<p>That is a very crude bit of code to run the tests. Basically I use FIR filters to split the stream into three parts: high to feed the HF horn, low to feed the speaker, and a bell-shaped EQ stream around 2200 Hz to do the magic. Totally mocked up out of thin air (and some prior listening). If you are really interested, you can work out the attack/release timing and chosen gain slopes (also derived with some listening).</p>
+<h2 id="promising-conclusions">Promising conclusions</h2>
+<p>Now for the promising conclusions: yes. EQ-ing with dynamic linear-phase EQ does help to create a loudspeaker that is way more versatile: you can play it more dynamically (read: louder) without being annoyed by that ripping horn distortion.</p>
+<p>But care should be taken not to overdo the processing, because it sounds like that: over-processing. Also, as live-sound engineers we are totally used to how all these elements like loudspeakers and microphones behave, and in fact make use of the nonlinearities in the creative process. More research is required.</p>
+<p>Here is some food for thought: below is a measurement of the first two distortions of the HF horn under test. We all know the second harmonic is OK and the third is bad, right? Now look where I chose (by ear) that EQ point: right at 2.2k, where the third bumps up (and the second goes down).</p>
+<figure class="post-figure post-figure--wide"><a class="lightbox-link" data-lightbox="" href="../assets/img/dynamic-lin-phase-eqsome-trials_21/01.png"><img alt="Distortion measurement of the HF horn showing first, second and third harmonic levels" class="post-figure-img" decoding="async" height="625" loading="lazy" src="../assets/img/dynamic-lin-phase-eqsome-trials_21/01.png" width="849" srcset="../assets/img/dynamic-lin-phase-eqsome-trials_21/01-480.webp 480w, ../assets/img/dynamic-lin-phase-eqsome-trials_21/01.png 849w" sizes="(min-width: 1000px) 720px, 92vw"></a></figure>
+<p>Brown = SPL 1st harmonic. Red = SPL 2nd harmonic. Yellow = SPL 3rd harmonic.</p>
+<p>One more thing I would like to add: in my discussions with my great audio friend Prof. Dr. SA (you know who you are), he once coined the phrase equal-group-distortion. Naturally this is nothing; what he was saying is that it is the discontinuities and bumps in distortion patterns that make us jump into action.</p></div><nav class="postnav" aria-label="More notes"><a href="../posts/dynamic-lin-phase-eqsome-trials.html"><span class="mono">&larr; Previous note</span><strong>Dynamic lin. phase EQ..some trials.. — part 1</strong></a><a href="../posts/pmc-lb1-historic-investigation-in.html"><span class="mono">Next note &rarr;</span><strong>PMC LB1 a historic investigation in legacy sound, part 1</strong></a></nav></article>
+<aside class="article-rail">
+<div class="rail-box"><h2>Note details</h2><div class="rail-stats"><div><span>Published</span><b>Nov 2023</b></div><div><span>Reading</span><b>3 min</b></div><div><span>Words</span><b>577</b></div><div><span>Figures</span><b>1</b></div></div></div>
+<div class="rail-box"><h2>Filed under</h2><div class="chips"><a class="chip" href="../labels/blurbs.html">Blurbs</a><a class="chip" href="../labels/current-projects.html">Current Projects</a></div></div>
+<div class="rail-box"><h2>In this note</h2><div class="toc-list"><a class="toc-l2" href="#linear-phase-eq-part-2">Linear phase EQ, part 2</a><a class="toc-l2" href="#promising-conclusions">Promising conclusions</a></div></div>
+<div class="rail-box"><h2>Read next</h2><div class="rail-list"><a href="../posts/jean-marie-reynaud-sonatesome.html"><img src="../assets/img/jean-marie-reynaud-sonatesome/01.jpg" srcset="../assets/img/jean-marie-reynaud-sonatesome/01-480.webp 480w, ../assets/img/jean-marie-reynaud-sonatesome/01-960.webp 960w, ../assets/img/jean-marie-reynaud-sonatesome/01.jpg 1201w" sizes="60px" width="1201" height="1600" alt="Jean Marie Reynaud Sonate..some restoration" loading="lazy" decoding="async"><span>Jean Marie Reynaud Sonate..some restoration</span></a><a href="../posts/dynamic-lin-phase-eqsome-trials.html"><img src="../assets/img/dynamic-lin-phase-eqsome-trials/04.jpg" srcset="../assets/img/dynamic-lin-phase-eqsome-trials/04-480.webp 480w, ../assets/img/dynamic-lin-phase-eqsome-trials/04-960.webp 960w, ../assets/img/dynamic-lin-phase-eqsome-trials/04-1600.webp 1600w, ../assets/img/dynamic-lin-phase-eqsome-trials/04.jpg 1600w" sizes="60px" width="1600" height="1200" alt="Dynamic lin. phase EQ..some trials.. — part 1" loading="lazy" decoding="async"><span>Dynamic lin. phase EQ..some trials.. — part 1</span></a></div></div>
+<div class="rail-box"><h2>About</h2><p>Research notes by Thei Munten, sound engineer and audio researcher. Measurement-led, always.</p><p style="margin-top:10px"><a href="../about.html" style="color:var(--accent);text-decoration:none">About the lab &rarr;</a></p></div>
+</aside></div>
+</div>
+</main>
+<footer class="site-footer">
+<div class="wrap footer-inner">
+<div class="footer-brand"><strong>KBLsystems Audio Lab</strong>A local static archive of 29 notes on sound reproduction, measurement and the machines that make it happen.</div>
+<div class="footer-links"><a href="../index.html">Index</a><a href="../archive.html">Archive</a><a href="../about.html">About</a><a href="../examples/index.html">Design study</a><a href="https://kblsystems.blogspot.com/" target="_blank" rel="noopener noreferrer">Original blog</a></div>
+</div>
+</footer>
+</body></html>
